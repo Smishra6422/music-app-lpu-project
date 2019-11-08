@@ -1,0 +1,309 @@
+<% var songIdArr = [], artistArr = [], albumArr = [] %>
+<% songData.forEach(data => { %>
+
+    <% songIdArr.push(data) %>   
+
+<% }) %>
+
+<% artistData.forEach(data => { %>
+
+    <% artistArr.push(data) %>   
+
+<% }) %>
+
+<% albumData.forEach(data => { %>
+
+    <% albumArr.push(data) %>   
+
+<% }) %>
+
+
+
+<script>
+
+    var songDataDetail = <%- JSON.stringify(songIdArr) %>
+    var artistDataDetail = <%- JSON.stringify(artistArr) %>
+    var albumDataDetail = <%- JSON.stringify(albumArr) %>
+// console.log(test);
+    
+
+$(document).ready(function() {
+    
+    currentPlaylist = songDataDetail
+    audioElement = new Audio()
+    
+    setTrack(currentPlaylist[0], currentPlaylist, false)
+    updateVolumeProgressBar(audioElement.audio)
+
+    $('#nowPlayingContainer').on("mousedown touchstart mousemove touchmove", function(e) {
+        e.preventDefault()
+    })
+
+    $('.playbackBar .progressBar').mousedown(function() {
+        mouseDown = true
+    })
+
+    $('.playbackBar .progressBar').mousemove(function(e) {
+        if(mouseDown == true) {
+            timeFromOffset(e, this)
+        }
+    })
+
+    $('.playbackBar .progressBar').mouseup(function(e) {
+        
+            timeFromOffset(e, this)
+        
+    })
+
+    $('.volumeBar .progressBar').mousedown(function() {
+        mouseDown = true
+    })
+
+    $('.volumeBar .progressBar').mousemove(function(e) {
+        if(mouseDown == true) {
+            var percentage = e.offsetX / $(this).width()
+
+            if(percentage>=0 && percentage<=1) {
+                audioElement.audio.volume = percentage
+            }
+        }
+    })
+
+    $('.volumeBar .progressBar').mouseup(function(e) {
+        
+        var percentage = e.offsetX / $(this).width()
+
+       if(percentage>=0 && percentage<=1) {
+           audioElement.audio.volume = percentage
+          }
+        
+    })
+    
+    $(document).mouseup(function() {
+        mouseDown = false
+    })
+
+
+})
+
+function timeFromOffset(mouse, progressBar) {
+    var percentage = mouse.offsetX / $(progressBar).width() *100
+    var seconds = audioElement.audio.duration * (percentage / 100)
+    audioElement.setTime(seconds)
+}
+
+function prevSong() {
+    if(audioElement.audio.currentTime < 3 && currentIndex == 0) {
+        currentIndex = currentPlaylist.length-1
+        setTrack(currentPlaylist[currentIndex], currentPlaylist, true)
+    } else if(audioElement.audio.currentTime < 3 && currentIndex == currentPlaylist.length-1) {
+        currentIndex--;
+        setTrack(currentPlaylist[currentIndex], currentPlaylist, true)
+    }
+    else if(audioElement.audio.currentTime >= 3 || currentIndex == 0) {
+        audioElement.setTime(0)
+    }  else {
+        currentIndex--;
+        setTrack(currentPlaylist[currentIndex], currentPlaylist, true)
+    }
+}
+
+function nextSong() {
+
+    if(repeat === true) {
+        audioElement.setTime(0)
+        playSong()
+        return
+    }
+
+    if(currentIndex === currentPlaylist.length - 1) {
+        currentIndex = 0
+    } else {
+        currentIndex++;
+    }
+
+    var trackToPlay = currentPlaylist[currentIndex]
+    setTrack(trackToPlay, currentPlaylist, true)
+}
+
+function setRepeat() {
+    repeat = !repeat
+    var image = repeat ? "repeat-active.png" : "repeat.png"
+    $('.controlButton.repeat img').attr('src', '/images/icons/'+image)
+}
+
+function setMute() {
+    audioElement.audio.muted = !audioElement.audio.muted
+    var image = audioElement.audio.muted ? "volume-mute.png" : "volume.png"
+    $('.controlButton.volume img').attr('src', '/images/icons/'+image)
+}
+
+function setShuffle() {
+    shuffle = !shuffle
+    var image = shuffle ? "shuffle-active.png" : "shuffle.png"
+    $('.controlButton.shuffle img').attr('src', '/images/icons/'+image)
+
+    if(shuffle == true) {
+        shuffleArray(shufflePlaylist)
+
+    } else {
+
+    }
+}
+
+function shuffleArray(array) {
+    for (var i = array.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
+function setTrack(trackId, newPlaylist, play) {
+
+    if(newPlaylist !== currentPlaylist) {
+        currentPlaylist = newPlaylist
+        shufflePlaylist = currentPlaylist.slice()
+        shuffleArray(shufflePlaylist)
+    }
+
+    currentIndex = currentPlaylist.indexOf(trackId)
+    pauseSong()
+
+    console.log(currentIndex)
+
+
+    // var trackDetail = songDataDetail[Math.round(Math.random()*10)]  // Random Song
+
+    console.log(newPlaylist)
+    
+    
+    var artistDetail = artistDataDetail.find(data => data._id===newPlaylist[currentIndex].artist)
+    var albumDetail = albumDataDetail.find(data => data._id1===newPlaylist[currentIndex].album)
+    console.log(albumDetail)
+   
+
+    $('.trackName').text(newPlaylist[currentIndex].title)
+    $('.artistName').text(artistDetail.name)
+    $('.albumLink img').attr("src", albumDetail.artworkPath)
+    audioElement.setTrack(newPlaylist[currentIndex].path)
+
+    if(play === true) {
+        audioElement.play()
+    }
+   
+       }
+
+       function playSong() {
+           $('.controlButton.play').hide()
+           $('.controlButton.pause').show()
+           audioElement.play()
+       }
+
+       function pauseSong() {
+           $('.controlButton.play').show()
+           $('.controlButton.pause').hide()
+           audioElement.pause()
+       }
+
+
+
+
+
+</script>
+
+
+<div id="nowPlayingContainer" >
+    <div id="nowPlaying">
+        
+            <div id="nowPlayingleft" >
+
+                <div class="content">
+                    <span class="albumLink">
+                        <img src="" class="albumImage">
+                    </span>
+
+                    <div class="trackInfo">
+
+                        <span class="trackName">
+                            <span></span>
+                        </span>
+
+                        <span class="artistName">
+                            <span></span>
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div id="nowPlayingCenter">
+
+                <div class="content playerControls">
+
+                    <div class="buttons">
+
+                        <button class="controlButton shuffle" title="shuffle" onclick="setShuffle()" style="display: none;">
+                            <img src="/images/icons/shuffle.png" alt="shuffle">
+                        </button>
+
+                        <button class="controlButton previous" title="previous" onclick="prevSong()">
+                            <img src="/images/icons/previous.png" alt="previous">
+                        </button>
+
+                        <button class="controlButton play" title="play" onclick="playSong()">
+                            <img src="/images/icons/play.png" alt="play">
+                        </button>
+
+                        <button class="controlButton pause" title="pause" style="display: none;" onclick="pauseSong()">
+                            <img src="/images/icons/pause.png" alt="pause">
+                        </button>
+
+                        <button class="controlButton next" title="next" onclick="nextSong()">
+                            <img src="/images/icons/next.png" alt="next">
+                        </button>
+
+                        <button class="controlButton repeat" title="repeat" onclick="setRepeat()">
+                            <img src="/images/icons/repeat.png" alt="repeat">
+                        </button>
+
+                    </div>
+
+                    <div class="playbackBar">
+
+                        <span class="progressTime current">0.00</span>
+
+                        <div class="progressBar">
+                            <div class="progressBarColor">
+                                <div class="progressCurrent"></div>
+                            </div>
+                        </div>
+
+                        <span class="progressTime remainig">0.00</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div id="nowPlayingRight" >
+
+                <div class="volumeBar">
+                    <button class="controlButton volume" title="volume" onclick="setMute()">
+                        <img src="/images/icons/volume.png" alt="volume">
+                    </button>
+
+                    <div class="progressBar">
+                        <div class="progressBarColor">
+                            <div class="progressCurrent"></div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+
+    </div>
+</div>

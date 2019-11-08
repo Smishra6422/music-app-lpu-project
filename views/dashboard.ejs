@@ -1,0 +1,32 @@
+            
+            
+            
+            <%- include ./partials/header.ejs %>
+
+             <h1 class="pageHeadingInBig">MOG'S MUSIC WARDROBE</h1>
+
+              <% albumData.forEach(data => { %>
+
+                <div class="gridViewItem">
+                    <a href="/album?data=<%= `${data.albumId}` %>">
+                            <img src=<%= `${data.artworkPath}` %>>
+
+                            <div class="gridViewInfo">
+                                    <%= data.title %> 
+                                </div>
+                    </a>
+                    
+
+                   
+
+                </div>
+
+                
+                 
+
+             <% }) %>
+            
+           
+            <%- include ./partials/mainfooter.ejs %>   
+
+

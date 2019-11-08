@@ -1,0 +1,137 @@
+<%- include ./partials/header.ejs %>
+
+
+<% var albumid, dummyData,shu=[]; %>
+<% albumData.forEach(data => { %>
+
+            <% if(data.albumId===id) { %>
+                <% albumid=data.albumId %>
+               
+                <% image = data.artworkPath %>
+
+                <% title = data.title %>
+               
+
+                <% artistData.forEach(artistdata => { %>
+
+                    <% if(artistdata._id===data.artist) { %>
+                
+                        <% name = artistdata.name %>
+                        
+                
+                   <% } %>   
+                
+                <% }) %>
+
+                <% songcount =  songData.filter(songdata => { %>
+
+                    <% if(songdata.album === data.albumId){ %>
+
+                        <% return songData %>
+
+                   <% } %>
+
+               <% }) %>
+
+           <% } %>   
+
+<% }) %>
+
+
+<div class="entityInfo">
+
+    <div class="leftSection">
+        <img src=<%= `${image}` %>>
+    </div>
+
+    <div class="rightSection">
+
+        <h2><%= `${title}` %></h2>
+        <p><%= `${name}` %></p>
+        <p><%= `${songcount.length}` %> songs</p>
+    </div>
+
+</div>
+
+<div class="trackListContainer">
+
+    <ul class="trackList">
+
+            <% dummyData = songData.filter(songdata => { %>
+
+                <% return (songdata.album === albumid) %>
+
+                <% }) %>
+
+            <% i=1 %>
+            <% songData.filter(songdata => { %>
+
+                <% if(songdata.album === albumid){ %>
+
+                    <li class="trackListRow">
+
+                            <div class="trackCount" >
+                                 <% shu = (JSON.stringify(songdata))%>
+                             <img src="/images/icons/play-white.png" onclick="alert('Sorry! we are working on it right. Sorry for inconvience.')" >
+                             <span class="trackNumber"><%= i %></span>
+
+                            </div>
+
+                            <div class="trackInfo">
+                                <span class="trackName1">
+                                    <%= songdata.title %>
+                                    
+                                </span>
+
+                                <span class="artistName1">
+
+                                        <% artistData.forEach(artistdata => { %>
+
+                                            <% if(artistdata._id===songdata.artist) { %>
+                                        
+                                                <%= artistdata.name %>
+                                        
+                                           <% } %>   
+                                        
+                                        <% }) %>
+
+                                </span>
+
+                            </div>
+
+                            <div class="trackDuration">
+
+                                    <span class="duration">
+                                            
+                                        <%= songdata.duration %>
+                                            
+                                    </span>
+
+                            </div>
+             
+                        </li>
+             
+                        <% i++ %>
+
+               <% } %>
+
+           <% }) %>
+
+           <script>
+            tempPlaylist = <%- JSON.stringify(dummyData) %>
+          
+            var songdata = tempPlaylist[1]
+
+           </script>
+
+    </ul>
+
+</div>
+
+
+
+
+
+
+
+<%- include ./partials/mainfooter.ejs %>
